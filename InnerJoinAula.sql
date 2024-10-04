@@ -111,7 +111,70 @@ SELECT al.nome AS Nome_aluno, Turmas.turma_id, Turmas.descricao AS Nome_Matéria
 FROM Alunos AS al
 LEFT JOIN Turmas ON al.turma_id = Turmas.turma_id;
 
+SELECT nome FROM alunos WHERE aluno_id = 1;
+SELECT nome FROM alunos WHERE aluno_id = 3;
+
+-- IN subconsulta, praticidade diferente do exemplo de cima
+SELECT nome FROM alunos WHERE aluno_id IN (1, 3);
+
+-- Selecionar duas turmar com base no ID
+
+SELECT descricao FROM turmar WHERE turma_id IN (1, 2);
+
+-- listar os alunos que não estão na turma de história.
+SELECT * FROM alunos;
+SELECT nome FROM alunos WHERE turma_id NOT IN (2);
+
+-- Any -> Qualquer
+-- Vamos listar os alunos que tem pelo menos 1 nota > 8
+
+SELECT nome FROM alunos WHERE aluno_id = ANY(
+	SELECT aluno_id
+    FROM notas
+    WHERE nota <= 8.0 AND turma_id = 2
+);
+
+-- EXISTS -> Existe
+-- Vamos listar os professores que tem pelo menos uma turma associada
+SELECT nome FROM professores AS p
+WHERE EXISTS (
+	SELECT 1
+    FROM Turma_Professor AS tp
+    WHERE tp.professor_id = p.professor_id
+);
+
+-- ALL -> TODOS
+-- IN -> ENTRE
+-- ANY -> QUALQUER
+-- LISTE TODOS OS ALUNOS QUE ESTÃO NA TURMA DE HISTÓRIA (ID = 2)
+-- E QUE A NOTA 8 SEJA MAIOR QUE TODAS AS NOTAS DADAS EM ATIVIDADES
+-- DESSA TURMA
+
+SELECT nome, Notas.nota FROM Alunos 
+INNER JOIN Turmas WHERE turma_id IN(2)
+INNER JOIN Notas ON Notas.aluno_id = Alunos.aluno_id;
+
+SELECT nome FROM Alunos
+WHERE turma_id IN (2);
 
 
 
 
+SELECT nome FROM alunos WHERE aluno_id = ANY (
+	SELECT aluno_id
+    FROM notas
+    WHERE atividade_id IN (
+		SELECT atividade_id
+        FROM atividadees 
+        WHERE turma_id = 2 -- Todas as atividades da turma 2
+    )
+)
+AND 8.0 > ALL (
+	SELECT nota
+    FROM Notas
+    WHERE atividade_id IN (
+		SELECT atividade_id
+        FROM atividades
+        WHERE turma_id = 2
+    )
+)
